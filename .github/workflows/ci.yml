@@ -18,8 +18,8 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
-      - run: sudo apt-get update && sudo apt-get install -y shellcheck shfmt taskwarrior
+      - run: sudo apt-get update && sudo apt-get install -y shellcheck shfmt taskwarrior just
       - run: uv sync
-      - run: make lint
-      - run: make test
-      - run: make bridge-build
+      - run: just lint
+      - run: just test
+      - run: just bridge-build
