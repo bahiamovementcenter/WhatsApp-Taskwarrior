@@ -55,5 +55,5 @@ Even a batch with no tasks needs an empty plan applied, so the cursors advance.
 
 ## Dev
 
-`make check` runs lint and tests. Tests use a throwaway Taskwarrior data dir and a
+`just check` runs lint and tests. Tests use a throwaway Taskwarrior data dir and a
 fixture SQLite DB; they never touch real data.

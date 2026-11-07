@@ -17,26 +17,28 @@ Turn WhatsApp messages into [Taskwarrior](https://taskwarrior.org) tasks, built 
 
 **Dev Container (recommended):** open the repo in VS Code / Codespaces and pick
 "Reopen in Container". The container includes Python 3.12, uv, Go 1.26, gcc (for
-go-sqlite3), ffmpeg, sqlite3, shellcheck, shfmt and Taskwarrior, then runs
+go-sqlite3), ffmpeg, sqlite3, shellcheck, shfmt, just and Taskwarrior, then runs
 `scripts/bootstrap.sh`.
 
-**Local Linux:** install the tools above, then:
+**Local Linux:** install the tools above (including [just](https://github.com/casey/just), e.g. `apt install just` or `uv tool install rust-just`), then:
 
 ```bash
 git clone --recurse-submodules https://github.com/bahiamovementcenter/WhatsApp-Taskwarrior
 ```
 
 ```bash
-make bootstrap
+just bootstrap
 ```
 
 ## Common tasks
 
 ```bash
-make bridge   # run the Go bridge; scan the QR code with WhatsApp on first run
-make mcp      # run the MCP server (stdio)
-make check    # lint (ruff, shellcheck, shfmt, go vet) + tests
-make help     # list all targets
+just bridge   # run the Go bridge; scan the QR code with WhatsApp on first run
+just mcp      # run the MCP server (stdio)
+just check    # lint (ruff, shellcheck, shfmt, go vet) + tests
+just pull     # read new messages from allowlisted chats into .wtw/batch.json
+just check-plan  # dry run of .wtw/plan.json
+just          # list all recipes
 ```
 
 Updating the upstream whatsapp-mcp pin:
@@ -49,7 +51,7 @@ git submodule update --remote third_party/whatsapp-mcp
 
 The safe path, one step at a time:
 
-1. **Pair the bridge on your own computer:** `make bridge`, scan the QR code with
+1. **Pair the bridge on your own computer:** `just bridge`, scan the QR code with
    WhatsApp (Linked devices). This can't be done in a cloud session.
 2. **Pick the chats:** `cp wtw.example.toml wtw.toml`, then
    `uv run wtw chats --groups` and copy the JIDs of the groups you want into

@@ -34,4 +34,4 @@ if [[ ! -f .env ]]; then
   echo "==> Created .env from .env.example"
 fi
 
-echo "Done. Next: 'make bridge' to pair WhatsApp (QR code), then 'make mcp'."
+echo "Done. Next: 'just bridge' to pair WhatsApp (QR code), then 'just mcp'."

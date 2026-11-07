@@ -9,7 +9,7 @@
       "Bash(curl *:8080*)",
       "Bash(task * delete*)",
       "Bash(task * purge*)",
-      "Bash(*wtw apply* --apply*)",
+      "Bash(*--apply*)",
       "Read(**/store/**)",
       "Edit(.wtw/**)",
       "Write(.wtw/**)"
