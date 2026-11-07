@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "whatsapp": {
+      "command": "uv",
+      "args": ["--directory", "third_party/whatsapp-mcp/whatsapp-mcp-server", "run", "main.py"],
+      "env": {
+        "WHATSAPP_DB_PATH": "../whatsapp-bridge/store/messages.db",
+        "WHATSMEOW_DB_PATH": "../whatsapp-bridge/store/whatsapp.db"
+      }
+    }
+  }
+}
