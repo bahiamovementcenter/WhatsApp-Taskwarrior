@@ -55,5 +55,8 @@ Even a batch with no tasks needs an empty plan applied, so the cursors advance.
 
 ## Dev
 
+`examples/demo/` has a sample chat and the plans an agent should write for it;
+use it as the reference for what to turn into tasks. `just demo` runs it.
+
 `just check` runs lint and tests. Tests use a throwaway Taskwarrior data dir and a
 fixture SQLite DB; they never touch real data.

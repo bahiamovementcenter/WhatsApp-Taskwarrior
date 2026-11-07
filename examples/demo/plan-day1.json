@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "operations": [
+    {"op": "add", "source": {"chat_jid": "120363111111111111@g.us", "message_id": "3EB0D1M01"},
+     "description": "Get ready for the open house", "due": "2026-11-14", "tags": ["openhouse"]},
+    {"op": "add", "source": {"chat_jid": "120363111111111111@g.us", "message_id": "3EB0D1M02"},
+     "description": "Order 12 new yoga mats", "due": "2026-11-06", "priority": "M", "tags": ["supplies"]},
+    {"op": "add", "source": {"chat_jid": "120363111111111111@g.us", "message_id": "3EB0D1M05"},
+     "description": "Send Lia the final flyer design so she can print it", "due": "2026-11-04", "tags": ["openhouse"]},
+    {"op": "add", "source": {"chat_jid": "120363111111111111@g.us", "message_id": "3EB0D1M06"},
+     "description": "Call the technician about the AC noise in room 2", "tags": ["maintenance"]},
+    {"op": "add", "source": {"chat_jid": "120363111111111111@g.us", "message_id": "3EB0D1M09"},
+     "description": "Send the payroll numbers to the accountant", "due": "2026-11-10", "priority": "H", "tags": ["admin"]}
+  ]
+}

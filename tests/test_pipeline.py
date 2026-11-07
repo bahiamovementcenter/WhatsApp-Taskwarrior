@@ -147,9 +147,19 @@ def test_apply_add_then_complete_is_idempotent(workspace):
 
     cursors = json.loads((workspace / "state" / "cursors.json").read_text())
     assert cursors[GROUP].startswith("2026-11-07 10:02")
-    assert pull(workspace)["messages"][0]["id"] == "M3"  # boundary re-read only
+    assert pull(workspace)["messages"] == []  # nothing new; boundary message not repeated
 
-    write_plan(workspace, [{"op": "complete", "source": src("M3"), "task": key}])
+    # A late message stored with the same timestamp as the cursor is still picked up.
+    conn = sqlite3.connect(workspace / "messages.db")
+    conn.execute(
+        "INSERT INTO messages VALUES ('M4', ?, '111', 'Booked it', '2026-11-07 10:02:00+00:00', 0, NULL, NULL)",
+        (GROUP,),
+    )
+    conn.commit()
+    conn.close()
+    assert [m["id"] for m in pull(workspace)["messages"]] == ["M4"]
+
+    write_plan(workspace, [{"op": "complete", "source": src("M4"), "task": key}])
     assert cli.main(["apply", "plan.json", "batch.json", "--apply"]) == 0
     assert owned(workspace)[key]["status"] == "completed"
     assert any((workspace / "state" / "backups").iterdir())
@@ -164,9 +174,12 @@ def test_tasks_without_wa_key_are_untouched(workspace):
     pull(workspace)
     write_plan(workspace, [{"op": "add", "source": src("M1"), "description": "Book the venue"}])
     assert cli.main(["apply", "plan.json", "batch.json", "--apply"]) == 0
-    out = subprocess.run(
-        ["task", "rc.data.location=taskdata", "rc.json.array=on", "export"], check=True, capture_output=True, text=True
-    ).stdout
+    from whatsapp_taskwarrior.taskwarrior import decode_output
+
+    raw = subprocess.run(
+        ["task", "rc.data.location=taskdata", "rc.json.array=on", "export"], check=True, capture_output=True
+    )
+    out = decode_output(raw.stdout)
     mine = [t for t in json.loads(out) if t["description"] == "my own task"]
     assert len(mine) == 1 and mine[0]["status"] == "pending" and "wa_key" not in mine[0]
 
@@ -180,3 +193,11 @@ def test_forged_batch_message_is_rejected(workspace, capsys):
     assert cli.main(["apply", "plan.json", "batch.json", "--apply"]) == 2
     assert "not in messages.db" in capsys.readouterr().err
     assert owned(workspace) == {}
+
+
+def test_decode_output_repairs_cesu8_emoji():
+    from whatsapp_taskwarrior.taskwarrior import decode_output
+
+    raw = "🎉".encode("utf-8", "surrogatepass")  # how Taskwarrior 2.6 writes 🎉
+    assert decode_output(raw) == "🎉"
+    assert decode_output("plain ✅ text 🎉".encode()) == "plain ✅ text 🎉"

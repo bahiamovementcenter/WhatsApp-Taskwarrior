@@ -61,6 +61,21 @@ Updating the upstream whatsapp-mcp pin:
 git submodule update --remote third_party/whatsapp-mcp
 ```
 
+## Try it on sample data first
+
+```bash
+just demo
+```
+
+This runs the whole flow on a made-up group chat ("Studio Team", two days of
+messages in `examples/demo/chat.json`) without WhatsApp or a phone. It builds a
+fake bridge database, runs `wtw pull`, shows the dry run of the plans the agent
+would write (`examples/demo/plan-day*.json`), applies them into a scratch task
+list, and prints the result: new tasks on day 1, then notes, a new task and two
+completions on day 2. It also shows that re-running a plan does nothing and that
+a plan citing a made-up message is rejected. Everything goes in `.wtw-demo/`;
+your real tasks and `~/.taskrc` are never touched.
+
 ## Using it
 
 The safe path, one step at a time:

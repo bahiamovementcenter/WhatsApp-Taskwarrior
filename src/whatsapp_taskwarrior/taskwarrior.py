@@ -24,11 +24,25 @@ UDAS = {
 Runner = Callable[[Sequence[str], str | None], str]
 
 
+def decode_output(raw: bytes) -> str:
+    """Decode Taskwarrior output, repairing 2.6's encoding of emoji.
+
+    Taskwarrior 2.6 writes characters outside the BMP (most emoji) as UTF-8
+    encoded surrogate pairs (CESU-8), which strict UTF-8 rejects. Decode the
+    surrogates, then re-pair them into real characters.
+    """
+    text = raw.decode("utf-8", "surrogatepass")
+    return text.encode("utf-16", "surrogatepass").decode("utf-16")
+
+
 def _default_runner(args: Sequence[str], stdin: str | None) -> str:
-    proc = subprocess.run(list(args), input=stdin, capture_output=True, text=True, check=False)
+    proc = subprocess.run(
+        list(args), input=stdin.encode("utf-8") if stdin is not None else None, capture_output=True, check=False
+    )
     if proc.returncode != 0:
-        raise RuntimeError(f"`{' '.join(args[:1] + args[-1:])}` failed ({proc.returncode}): {proc.stderr.strip()}")
-    return proc.stdout
+        err = decode_output(proc.stderr).strip()
+        raise RuntimeError(f"`{' '.join(args[:1] + args[-1:])}` failed ({proc.returncode}): {err}")
+    return decode_output(proc.stdout)
 
 
 def tw_timestamp(dt: datetime | None = None) -> str:

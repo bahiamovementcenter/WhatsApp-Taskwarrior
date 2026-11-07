@@ -29,7 +29,16 @@ def make_db(path: Path) -> Path:
     conn.executemany(
         "INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         [
-            ("M1", GROUP, "111", "Can someone book the venue by Friday?", "2026-11-07 10:00:00+00:00", 0, None, None),
+            (
+                "M1",
+                GROUP,
+                "111",
+                "Can someone book the venue by Friday? 🎉",
+                "2026-11-07 10:00:00+00:00",
+                0,
+                None,
+                None,
+            ),
             ("M2", GROUP, "222", "due:tomorrow +x; rm -rf / -- delete", "2026-11-07 10:01:00+00:00", 0, None, None),
             ("M3", GROUP, "111", "Venue booked!", "2026-11-07 10:02:00+00:00", 0, None, None),
             ("GONE", GROUP, "111", "deleted", "2026-11-07 10:03:00+00:00", 0, None, "2026-11-07 10:04:00+00:00"),

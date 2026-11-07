@@ -42,6 +42,10 @@ pull:
 check-plan plan=".wtw/plan.json" batch=".wtw/batch.json":
     uv run wtw apply {{ plan }} {{ batch }}
 
+# Walk through the whole flow on fake chat data, into a scratch task list (.wtw-demo/)
+demo:
+    scripts/demo.sh
+
 # Lint Python, shell, and Go
 lint: lint-sh
     uv run ruff check .
