@@ -28,3 +28,7 @@ store/
 !.vscode/extensions.json
 .idea/
 .DS_Store
+
+# wtw local config and state
+wtw.toml
+.wtw/

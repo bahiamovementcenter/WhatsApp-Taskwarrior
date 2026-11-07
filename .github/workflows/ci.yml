@@ -18,7 +18,7 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
-      - run: sudo apt-get update && sudo apt-get install -y shellcheck shfmt
+      - run: sudo apt-get update && sudo apt-get install -y shellcheck shfmt taskwarrior
       - run: uv sync
       - run: make lint
       - run: make test

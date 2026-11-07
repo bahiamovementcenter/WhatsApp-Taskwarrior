@@ -1,0 +1,17 @@
+# Copy to wtw.toml (git-ignored) and edit.
+state_dir = ".wtw"  # cursors, run log and Taskwarrior backups (git-ignored)
+
+[whatsapp]
+# The bridge's database. Opened read-only.
+messages_db = "third_party/whatsapp-mcp/whatsapp-bridge/store/messages.db"
+max_messages = 500
+
+# Only these chats are ever read. Find JIDs with: uv run wtw chats --groups
+[whatsapp.chats]
+# "120363000000000000@g.us" = "Family"
+
+[taskwarrior]
+project = "whatsapp"
+# Leave unset to use your normal Taskwarrior data. To trial this safely,
+# point it at a separate folder first:
+# data_location = ".wtw/taskdata"
