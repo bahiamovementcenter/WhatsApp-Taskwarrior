@@ -1,0 +1,32 @@
+{
+  "name": "WhatsApp-Taskwarrior",
+  "build": { "dockerfile": "Dockerfile" },
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": { "version": "3.12", "installTools": false },
+    "ghcr.io/devcontainers/features/go:1": { "version": "1.26", "golangciLintVersion": "latest" },
+    "ghcr.io/va-h/devcontainers-features/uv:1": {}
+  },
+  "containerEnv": {
+    "CGO_ENABLED": "1",
+    "UV_LINK_MODE": "copy"
+  },
+  "forwardPorts": [8080, 8000],
+  "portsAttributes": {
+    "8080": { "label": "whatsapp-bridge API", "onAutoForward": "silent" },
+    "8000": { "label": "whatsapp-mcp HTTP (optional)", "onAutoForward": "silent" }
+  },
+  "postCreateCommand": "bash scripts/bootstrap.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "golang.go",
+        "timonwong.shellcheck",
+        "mkhl.shfmt",
+        "editorconfig.editorconfig"
+      ]
+    }
+  },
+  "remoteUser": "vscode"
+}

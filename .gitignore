@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# Go
+bin/
+*.test
+*.out
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# WhatsApp session data (linked-device credentials, message DBs)
+store/
+*.db
+.bridge-token
+
+# Editors / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
