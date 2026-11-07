@@ -20,6 +20,20 @@ Turn WhatsApp messages into [Taskwarrior](https://taskwarrior.org) tasks, built 
 go-sqlite3), ffmpeg, sqlite3, shellcheck, shfmt, just and Taskwarrior, then runs
 `scripts/bootstrap.sh`.
 
+**Nix:** `nix develop` gives you a shell with every tool above at pinned
+versions (Python 3.12, uv, Go 1.26, Taskwarrior 3, just, and the rest). Clone
+with `--recurse-submodules` first. With direnv, put `use flake` in `.envrc`.
+You can also build and run the pieces directly:
+
+```bash
+nix run .#wtw -- --help          # the wtw CLI
+nix run .#whatsapp-bridge        # the WhatsApp bridge (run it from the folder that should hold store/)
+nix flake check                  # build both and run wtw's tests
+```
+
+The flake needs Nix 2.27 or newer (it includes the whatsapp-mcp submodule).
+Update pinned versions with `nix flake update`.
+
 **Local Linux:** install the tools above (including [just](https://github.com/casey/just), e.g. `apt install just` or `uv tool install rust-just`), then:
 
 ```bash

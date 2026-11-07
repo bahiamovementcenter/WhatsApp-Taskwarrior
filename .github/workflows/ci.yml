@@ -23,3 +23,14 @@ jobs:
       - run: just lint
       - run: just test
       - run: just bridge-build
+
+  nix:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: cachix/install-nix-action@v31
+      # Builds wtw (running its tests against Taskwarrior 3) and the bridge.
+      - run: nix flake check -L
+      - run: nix develop -c just check

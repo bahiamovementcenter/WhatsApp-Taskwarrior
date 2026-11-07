@@ -32,3 +32,8 @@ store/
 # wtw local config and state
 wtw.toml
 .wtw/
+
+# Nix
+result
+result-*
+.direnv/
