@@ -1,0 +1,14 @@
+# Demo config used by scripts/demo.sh (`just demo`). Everything lives in
+# .wtw-demo/ at the repo root (git-ignored); the script rewrites these paths.
+state_dir = "../../.wtw-demo/state"
+
+[whatsapp]
+messages_db = "../../.wtw-demo/messages.db"
+
+# Only the work group. The Family chat is in the sample data too, and is never read.
+[whatsapp.chats]
+"120363111111111111@g.us" = "Studio Team"
+
+[taskwarrior]
+project = "studio"
+data_location = "../../.wtw-demo/taskdata"

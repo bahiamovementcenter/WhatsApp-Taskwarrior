@@ -61,8 +61,8 @@ def fetch_messages(
     """Messages from ``chats`` at or after each chat's cursor, oldest first.
 
     ``>=`` (not ``>``) so a message stored later with the same timestamp as the
-    cursor is not skipped; re-reading the boundary message is harmless because
-    task creation is idempotent per message.
+    cursor is not skipped. The caller drops boundary messages it has already
+    handled (and task creation is idempotent per message anyway).
     """
     out: list[Message] = []
     with closing(connect(db_path)) as conn:

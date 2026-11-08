@@ -30,6 +30,16 @@ def _load_cursors(cfg: config_mod.Config) -> dict[str, str]:
     return json.loads(p.read_text(encoding="utf-8")) if p.is_file() else {}
 
 
+def _seen_path(cfg: config_mod.Config) -> Path:
+    return cfg.state_dir / "seen.json"
+
+
+def _load_seen(cfg: config_mod.Config) -> dict[str, list[str]]:
+    """Per chat, the ids of already-processed messages that sit exactly at the cursor."""
+    p = _seen_path(cfg)
+    return json.loads(p.read_text(encoding="utf-8")) if p.is_file() else {}
+
+
 def _write_json_atomic(path: Path, data: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
@@ -65,16 +75,23 @@ def cmd_pull(args: argparse.Namespace) -> int:
     if not cfg.chats:
         print("no chats in the allowlist ([whatsapp].chats); nothing to read", file=sys.stderr)
     cursors = _load_cursors(cfg)
+    seen = _load_seen(cfg)
     msgs = whatsapp.fetch_messages(cfg.messages_db, list(cfg.chats), cursors, cfg.max_messages)
+    # The cursor is inclusive (see fetch_messages); drop boundary messages already handled.
+    msgs = [m for m in msgs if not (m.timestamp == cursors.get(m.chat_jid) and m.id in seen.get(m.chat_jid, []))]
     new_cursors = dict(cursors)
     for m in msgs:
         if m.timestamp > new_cursors.get(m.chat_jid, ""):
             new_cursors[m.chat_jid] = m.timestamp
+    new_seen = {
+        jid: sorted({m.id for m in msgs if m.chat_jid == jid and m.timestamp == ts}) for jid, ts in new_cursors.items()
+    }
     batch = {
         "version": 1,
         "created": datetime.now(UTC).isoformat(timespec="seconds"),
         "chats": cfg.chats,
         "cursors": {k: v for k, v in new_cursors.items() if k in cfg.chats},
+        "seen": {k: v for k, v in new_seen.items() if k in cfg.chats and v},
         "truncated": len(msgs) >= cfg.max_messages,
         "messages": [m.to_dict() for m in msgs],
     }
@@ -113,10 +130,8 @@ def cmd_apply(args: argparse.Namespace) -> int:
             print(f"  - {p}", file=sys.stderr)
         return 2
 
-    for t in changes.new:
-        print(f"+ add      {t['description']}  [{t['wa_chat']}]")
-    for t in changes.updated:
-        print(f"~ update   {t['description']}  -> {t['status']}")
+    for line in changes.actions:
+        print(line)
     for s in changes.skipped:
         print(f"= skip     {s}")
 
@@ -137,10 +152,18 @@ def cmd_apply(args: argparse.Namespace) -> int:
 
     # Only move cursors forward, and only for allowlisted chats.
     cursors = _load_cursors(cfg)
+    seen = _load_seen(cfg)
     for jid, ts in batch.get("cursors", {}).items():
-        if jid in cfg.chats and ts > cursors.get(jid, ""):
+        if jid not in cfg.chats:
+            continue
+        batch_seen = batch.get("seen", {}).get(jid, [])
+        if ts > cursors.get(jid, ""):
             cursors[jid] = ts
+            seen[jid] = batch_seen
+        elif ts == cursors.get(jid):
+            seen[jid] = sorted(set(seen.get(jid, [])) | set(batch_seen))
     _write_json_atomic(_cursors_path(cfg), cursors)
+    _write_json_atomic(_seen_path(cfg), seen)
     print(f"wrote {len(changes.new)} new and {len(changes.updated)} updated tasks; cursors advanced")
     return 0
 

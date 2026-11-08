@@ -30,8 +30,9 @@ store/
 .DS_Store
 
 # wtw local config and state
-wtw.toml
+/wtw.toml
 .wtw/
+.wtw-demo/
 
 # Nix
 result

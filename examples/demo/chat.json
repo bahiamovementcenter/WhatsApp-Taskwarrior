@@ -1,0 +1,27 @@
+{
+  "chats": {
+    "120363111111111111@g.us": "Studio Team",
+    "120363222222222222@g.us": "Family"
+  },
+  "days": {
+    "1": [
+      ["3EB0D1M01", "120363111111111111@g.us", "5571900000001", false, "2026-11-02 08:01:12-03:00", "Morning all! Reminder that the open house is Saturday the 14th 🎉"],
+      ["3EB0D1M02", "120363111111111111@g.us", "5571900000001", false, "2026-11-02 08:03:40-03:00", "Can someone order the new yoga mats before Friday? We need 12."],
+      ["3EB0D1M03", "120363111111111111@g.us", "5571900000099", true, "2026-11-02 08:10:05-03:00", "I'll do it today"],
+      ["3EB0D1M04", "120363111111111111@g.us", "5571900000002", false, "2026-11-02 09:15:22-03:00", "Who's printing the flyers for the open house?"],
+      ["3EB0D1M05", "120363111111111111@g.us", "5571900000003", false, "2026-11-02 09:20:48-03:00", "I can print them, I just need the final design by Wednesday"],
+      ["3EB0D1M06", "120363111111111111@g.us", "5571900000001", false, "2026-11-02 11:02:33-03:00", "Also the AC in room 2 is making that noise again, we should call the technician"],
+      ["3EB0D1M07", "120363111111111111@g.us", "5571900000002", false, "2026-11-02 11:04:10-03:00", "😂 pretty sure the noise is me doing burpees"],
+      ["3EB0D1M08", "120363111111111111@g.us", "5571900000003", false, "2026-11-02 12:30:00-03:00", "", "image"],
+      ["3EB0D1M09", "120363111111111111@g.us", "5571900000001", false, "2026-11-02 17:45:19-03:00", "Ash, can you send the payroll numbers to the accountant by the 10th?"],
+      ["3EB0F1M01", "120363222222222222@g.us", "5571900000050", false, "2026-11-02 18:20:00-03:00", "Can you pick up bread on the way home?"]
+    ],
+    "2": [
+      ["3EB0D2M01", "120363111111111111@g.us", "5571900000099", true, "2026-11-04 08:30:02-03:00", "Mats ordered, they arrive Thursday 👍"],
+      ["3EB0D2M02", "120363111111111111@g.us", "5571900000003", false, "2026-11-04 09:12:44-03:00", "Flyers: still waiting on the design 🙏"],
+      ["3EB0D2M03", "120363111111111111@g.us", "5571900000001", false, "2026-11-04 10:05:51-03:00", "The AC technician is coming Monday at 10"],
+      ["3EB0D2M04", "120363111111111111@g.us", "5571900000002", false, "2026-11-04 14:40:09-03:00", "For the open house, can we also get balloons? Blue and white"],
+      ["3EB0D2M05", "120363111111111111@g.us", "5571900000099", true, "2026-11-04 16:18:37-03:00", "Sent the payroll numbers to the accountant ✅"]
+    ]
+  }
+}

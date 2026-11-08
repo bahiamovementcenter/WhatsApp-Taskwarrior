@@ -37,6 +37,8 @@
                 ./README.md
                 ./src
                 ./tests
+                ./examples
+                ./scripts/demo.sh
               ];
             };
             build-system = [ python.pkgs.hatchling ];
@@ -44,6 +46,8 @@
               python.pkgs.pytestCheckHook
               pkgs.taskwarrior3
             ];
+            # tests/test_demo.py runs scripts/demo.sh, which needs a shebang that works in the sandbox.
+            postPatch = "patchShebangs scripts";
             meta.mainProgram = "wtw";
           };
 

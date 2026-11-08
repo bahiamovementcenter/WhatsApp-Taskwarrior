@@ -35,7 +35,7 @@ def load(path: Path = DEFAULT_CONFIG) -> Config:
 
     def resolve(p: str) -> Path:
         q = Path(p).expanduser()
-        return q if q.is_absolute() else (base / q)
+        return (q if q.is_absolute() else (base / q)).resolve()
 
     wa = raw.get("whatsapp", {})
     tw = raw.get("taskwarrior", {})

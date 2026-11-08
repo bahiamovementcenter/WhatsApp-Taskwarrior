@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "operations": [
+    {"op": "complete", "task": "120363111111111111@g.us/3EB0D1M02", "source": {"chat_jid": "120363111111111111@g.us", "message_id": "3EB0D2M01"}},
+    {"op": "annotate", "task": "120363111111111111@g.us/3EB0D1M05", "source": {"chat_jid": "120363111111111111@g.us", "message_id": "3EB0D2M02"},
+     "text": "Lia is still waiting on the design"},
+    {"op": "annotate", "task": "120363111111111111@g.us/3EB0D1M06", "source": {"chat_jid": "120363111111111111@g.us", "message_id": "3EB0D2M03"},
+     "text": "Technician booked for Monday at 10"},
+    {"op": "add", "source": {"chat_jid": "120363111111111111@g.us", "message_id": "3EB0D2M04"},
+     "description": "Buy blue and white balloons for the open house", "due": "2026-11-13", "tags": ["openhouse"]},
+    {"op": "complete", "task": "120363111111111111@g.us/3EB0D1M09", "source": {"chat_jid": "120363111111111111@g.us", "message_id": "3EB0D2M05"}}
+  ]
+}

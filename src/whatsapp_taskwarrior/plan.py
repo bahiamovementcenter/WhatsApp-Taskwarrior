@@ -70,6 +70,7 @@ class Changes:
     new: list[dict] = field(default_factory=list)
     updated: list[dict] = field(default_factory=list)
     skipped: list[str] = field(default_factory=list)
+    actions: list[str] = field(default_factory=list)  # human-readable, in plan order
 
     @property
     def empty(self) -> bool:
@@ -144,6 +145,7 @@ def build_changes(
             if prio:
                 task["priority"] = prio
             changes.new.append(task)
+            changes.actions.append(f"+ add      {desc}" + (f"  (due {op['due']})" if op.get("due") else ""))
             continue
 
         target = op.get("task")
@@ -162,6 +164,7 @@ def build_changes(
                 changes.skipped.append(f"annotate {target}: already noted")
                 continue
             task.setdefault("annotations", []).append({"entry": now, "description": note})
+            changes.actions.append(f"~ note     {task.get('description')}: {text}")
         elif op["op"] == "complete":
             if task.get("status") != "pending":
                 changes.skipped.append(f"complete {target}: status is {task.get('status')}")
@@ -169,6 +172,7 @@ def build_changes(
             task["status"] = "completed"
             task["end"] = now
             task.setdefault("annotations", []).append({"entry": now, "description": f"Done per {provenance}"})
+            changes.actions.append(f"✓ complete {task.get('description')}")
         task["modified"] = now
         if not any(t is task for t in changes.updated):
             changes.updated.append(task)
