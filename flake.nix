@@ -56,6 +56,8 @@
             pname = "whatsapp-bridge";
             version = "0-unstable";
             src = ./third_party/whatsapp-mcp/whatsapp-bridge;
+            # WHATSAPP_ALLOWED_CHATS: keep messages only from the listed chats.
+            patches = [ ./nix/patches/bridge-chat-allowlist.patch ];
             vendorHash = "sha256-y/+6nSUDAs5oc/0BmZuOvwnTWrzkdgvFBuYiktbAjec=";
             env.CGO_ENABLED = 1;
             # Upstream's tests need network and a paired phone.

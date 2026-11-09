@@ -102,5 +102,13 @@ to Taskwarrior as JSON data, never on the command line. For the agent,
 ## Security
 
 The bridge's `store/` directory holds unencrypted linked-device credentials and
-message history. It is git-ignored; never commit it. `.env` is ignored too — copy
+message history. By default the bridge stores every chat the account sees,
+including personal ones. The flake's bridge carries a patch
+(`nix/patches/bridge-chat-allowlist.patch`) that limits this: set
+`WHATSAPP_ALLOWED_CHATS` to the chats to keep, as comma-separated `jid=label`
+entries (label optional), and messages from any other chat are neither stored
+nor printed. Put `chats_env = "WHATSAPP_ALLOWED_CHATS"` under `[whatsapp]` in
+`wtw.toml` and `wtw` reads the same list, so chat IDs can live in a secret
+instead of the config file. Other groups keep a name-only row so
+`wtw chats --groups` can still list them. `store/` is git-ignored; never commit it. `.env` is ignored too — copy
 from `.env.example`.

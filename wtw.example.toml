@@ -7,6 +7,9 @@ messages_db = "third_party/whatsapp-mcp/whatsapp-bridge/store/messages.db"
 max_messages = 500
 
 # Only these chats are ever read. Find JIDs with: uv run wtw chats --groups
+# Or keep chat IDs out of this file: name an env var holding "jid=label,jid2=label2"
+# (the patched bridge reads WHATSAPP_ALLOWED_CHATS too).
+# chats_env = "WHATSAPP_ALLOWED_CHATS"
 [whatsapp.chats]
 # "120363000000000000@g.us" = "Family"
 
