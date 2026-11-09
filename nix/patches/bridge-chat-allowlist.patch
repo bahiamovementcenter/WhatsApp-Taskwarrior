@@ -1,9 +1,9 @@
 diff --git a/allowlist.go b/allowlist.go
 new file mode 100644
-index 0000000..4978adb
+index 0000000..296e950
 --- /dev/null
 +++ b/allowlist.go
-@@ -0,0 +1,38 @@
+@@ -0,0 +1,40 @@
 +package main
 +
 +import (
@@ -12,22 +12,24 @@ index 0000000..4978adb
 +)
 +
 +// WHATSAPP_ALLOWED_CHATS limits which chats the bridge keeps messages for: a
-+// comma- or space-separated list of chat JIDs. When it is set, messages from
-+// any other chat are neither stored nor printed, and only group chats are
-+// recorded by JID and name (so they can be found and added to the list).
-+// Unset or empty keeps upstream behaviour: every chat is stored.
++// comma- or newline-separated list of chat JIDs, each optionally followed by
++// "=label" (the label is ignored here; wtw reads the same variable). When it
++// is set, messages from any other chat are neither stored nor printed, and
++// only group chats are recorded by JID and name (so they can be found and
++// added to the list). Unset or blank keeps upstream behaviour: every chat is
++// stored. A value with no usable JID stores nothing (fails closed).
 +var allowedChats = parseAllowedChats(os.Getenv("WHATSAPP_ALLOWED_CHATS"))
 +
 +func parseAllowedChats(raw string) map[string]bool {
-+	fields := strings.FieldsFunc(raw, func(r rune) bool {
-+		return r == ',' || r == ' ' || r == '\n' || r == '\t'
-+	})
-+	if len(fields) == 0 {
++	if strings.TrimSpace(raw) == "" {
 +		return nil
 +	}
-+	allowed := make(map[string]bool, len(fields))
-+	for _, jid := range fields {
-+		allowed[jid] = true
++	allowed := map[string]bool{}
++	for _, entry := range strings.FieldsFunc(raw, func(r rune) bool { return r == ',' || r == '\n' }) {
++		jid, _, _ := strings.Cut(entry, "=")
++		if jid = strings.TrimSpace(jid); strings.Contains(jid, "@") {
++			allowed[jid] = true
++		}
 +	}
 +	return allowed
 +}
@@ -44,10 +46,10 @@ index 0000000..4978adb
 +}
 diff --git a/allowlist_test.go b/allowlist_test.go
 new file mode 100644
-index 0000000..4600a63
+index 0000000..4b42475
 --- /dev/null
 +++ b/allowlist_test.go
-@@ -0,0 +1,106 @@
+@@ -0,0 +1,114 @@
 +package main
 +
 +import (
@@ -72,12 +74,20 @@ index 0000000..4600a63
 +}
 +
 +func TestParseAllowedChats(t *testing.T) {
-+	if got := parseAllowedChats(" , "); got != nil {
-+		t.Fatalf("empty list must mean no allowlist, got %v", got)
++	if got := parseAllowedChats("  \n "); got != nil {
++		t.Fatalf("blank value must mean no allowlist, got %v", got)
 +	}
-+	got := parseAllowedChats("1@g.us, 2@g.us\n3@g.us")
-+	if len(got) != 3 || !got["1@g.us"] || !got["3@g.us"] {
++	got := parseAllowedChats("1@g.us=Studio Team, 2@g.us\n3@g.us=")
++	if len(got) != 3 || !got["1@g.us"] || !got["2@g.us"] || !got["3@g.us"] {
 +		t.Fatalf("unexpected parse: %v", got)
++	}
++	if got := parseAllowedChats("BMC-Neo"); got == nil || len(got) != 0 {
++		t.Fatalf("a value with no JID must allow nothing, got %v", got)
++	}
++	allowedChats = parseAllowedChats("BMC-Neo")
++	t.Cleanup(func() { allowedChats = nil })
++	if chatAllowed("1@g.us") {
++		t.Fatalf("no usable JID must fail closed")
 +	}
 +}
 +
