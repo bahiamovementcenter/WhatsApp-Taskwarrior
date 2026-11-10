@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import pytest
-
 from whatsapp_taskwarrior import config
 
 
@@ -30,7 +28,7 @@ def test_chats_env_merges_with_table(tmp_path):
     assert config.load(p, environ={"V": "2@g.us=Env"}).chats == {"1@g.us": "File", "2@g.us": "Env"}
 
 
-def test_chats_env_rejects_non_jid(tmp_path):
+def test_chats_env_skips_entries_without_jid(tmp_path):
     p = write(tmp_path, '[whatsapp]\nmessages_db = "m.db"\nchats_env = "V"\n')
-    with pytest.raises(config.ConfigError):
-        config.load(p, environ={"V": "BMC-Neo"})
+    assert config.load(p, environ={"V": "none"}).chats == {}
+    assert config.load(p, environ={"V": "BMC-Neo, 1@g.us=Team"}).chats == {"1@g.us": "Team"}
