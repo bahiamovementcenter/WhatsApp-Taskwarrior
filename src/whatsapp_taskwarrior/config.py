@@ -34,7 +34,10 @@ class Config:
 
 
 def parse_chats_env(value: str) -> dict[str, str]:
-    """Parse ``jid=label,jid2=label2`` (labels optional) into jid -> label."""
+    """Parse ``jid=label,jid2=label2`` (labels optional) into jid -> label.
+
+    Entries without a JID (such as ``none``) are skipped, matching the bridge.
+    """
     chats: dict[str, str] = {}
     for entry in value.replace("\n", ",").split(","):
         entry = entry.strip()
@@ -42,6 +45,8 @@ def parse_chats_env(value: str) -> dict[str, str]:
             continue
         jid, _, label = entry.partition("=")
         jid, label = jid.strip(), label.strip()
+        if "@" not in jid:
+            continue  # e.g. "none": like the bridge, an entry without a JID allows nothing
         chats[jid] = label or jid
     return chats
 
