@@ -1,14 +1,19 @@
 diff --git a/allowlist.go b/allowlist.go
 new file mode 100644
-index 0000000..296e950
+index 0000000..b8dbff4
 --- /dev/null
 +++ b/allowlist.go
-@@ -0,0 +1,40 @@
+@@ -0,0 +1,70 @@
 +package main
 +
 +import (
++	"context"
 +	"os"
 +	"strings"
++	"time"
++
++	"go.mau.fi/whatsmeow"
++	waLog "go.mau.fi/whatsmeow/util/log"
 +)
 +
 +// WHATSAPP_ALLOWED_CHATS limits which chats the bridge keeps messages for: a
@@ -43,6 +48,31 @@ index 0000000..296e950
 +// listed by JID and name (groups only, never message content).
 +func recordOnlyName(chatJID string) bool {
 +	return strings.HasSuffix(chatJID, "@g.us")
++}
++
++// recordJoinedGroupNames lists the groups the account is in by JID and name
++// when the allowlist is set, so `wtw chats --groups` can find a group's JID
++// without anyone posting in it first. Only names are stored, never messages.
++func recordJoinedGroupNames(client *whatsmeow.Client, store *MessageStore, logger waLog.Logger) {
++	if allowedChats == nil {
++		return
++	}
++	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
++	defer cancel()
++	groups, err := client.GetJoinedGroups(ctx)
++	if err != nil {
++		logger.Warnf("Failed to list joined groups: %v", err)
++		return
++	}
++	for _, g := range groups {
++		if g == nil || g.Name == "" {
++			continue
++		}
++		if err := store.StoreChatName(g.JID.String(), g.Name); err != nil {
++			logger.Warnf("Failed to store group name: %v", err)
++		}
++	}
++	logger.Infof("Recorded names of %d joined groups", len(groups))
 +}
 diff --git a/allowlist_test.go b/allowlist_test.go
 new file mode 100644
@@ -165,7 +195,7 @@ index 0000000..4b42475
 +	}
 +}
 diff --git a/main.go b/main.go
-index de39ebd..57a61a2 100644
+index de39ebd..b673a15 100644
 --- a/main.go
 +++ b/main.go
 @@ -714,6 +714,9 @@ func (store *MessageStore) Close() error {
@@ -246,7 +276,15 @@ index de39ebd..57a61a2 100644
  	// If contact resolution fails (common for LIDs), PushName is often the best available display name.
  	// Only apply for direct messages (not groups) and only when the stored name is the numeric JID user.
  	if !msg.Info.IsFromMe && msg.Info.Chat.Server != "g.us" && strings.TrimSpace(msg.Info.PushName) != "" {
-@@ -3585,6 +3614,17 @@ func handleHistorySync(client *whatsmeow.Client, messageStore *MessageStore, his
+@@ -3260,6 +3289,7 @@ func main() {
+ 
+ 		case *events.Connected:
+ 			logger.Infof("✓ Successfully connected to WhatsApp servers")
++			go recordJoinedGroupNames(client, messageStore, logger)
+ 
+ 		case *events.LoggedOut:
+ 			logger.Warnf("⚠️  Device logged out, please scan QR code to log in again")
+@@ -3585,6 +3615,17 @@ func handleHistorySync(client *whatsmeow.Client, messageStore *MessageStore, his
  		// Get appropriate chat name by passing the history sync conversation directly
  		name := GetChatName(client, messageStore, resolved, chatJID, conversation, "", logger)
  
