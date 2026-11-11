@@ -24,6 +24,11 @@ Where the runtime matters, it says so.
 - **Command.** Run `wtw <command> ...`. In a checkout of the WhatsApp-Taskwarrior
   repo, run `uv run wtw ...` instead. A deployment that preconfigures `wtw` (such as
   openclaw-fly) refuses global options like `-c`; don't try to pass a config.
+- **Run one plain `wtw` command per call.** Don't check for it first with `which`,
+  `command -v` or `ls`, don't chain commands with `&&`, `;` or pipes, and don't
+  redirect output. Many runtimes allow `wtw` on its own but block or ask the user
+  about anything else (OpenClaw's exec allowlist does). If `wtw` itself is refused,
+  tell the user; don't try other commands to get around it.
 - **Working folder** for the batch and the plan, called `WORK` below:
   - openclaw-fly: `/data/workspace/wtw/` (your file tools only work in the workspace).
   - A checkout of the repo: `work/` at the repo root (git-ignored).
