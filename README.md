@@ -50,8 +50,9 @@ just bootstrap
 just bridge   # run the Go bridge; scan the QR code with WhatsApp on first run
 just mcp      # run the MCP server (stdio)
 just check    # lint (ruff, shellcheck, shfmt, go vet) + tests
-just pull     # read new messages from allowlisted chats into .wtw/batch.json
-just check-plan  # dry run of .wtw/plan.json
+just pull     # read new messages from allowlisted chats into work/batch.json
+just check-plan  # dry run of work/plan.json
+just apply    # write an approved plan (wtw-apply; you run this, not the agent)
 just          # list all recipes
 ```
 
@@ -87,17 +88,32 @@ The safe path, one step at a time:
    `[whatsapp.chats]`. Nothing else is ever read.
 3. **Trial on a separate task list first:** set `data_location = ".wtw/taskdata"`
    in `wtw.toml` so trial runs can't touch your real tasks.
-4. **Run the loop** (see `CLAUDE.md`): `wtw pull`, the agent writes a plan,
-   `wtw apply plan.json batch.json` shows a dry run, you add `--apply`.
+4. **Run the loop** (see the skill below): `wtw pull`, the agent writes a plan,
+   `wtw apply plan.json batch.json` shows a dry run, and once you approve it,
+   `wtw-apply plan.json batch.json` writes it.
 5. When the trial looks right, remove `data_location` to use your real list.
-   Every `--apply` backs up the Taskwarrior data to `.wtw/backups/` first.
+   Every `wtw-apply` backs up the Taskwarrior data to `.wtw/backups/` first.
+
+## Agents
+
+The agent's instructions are one agent-neutral skill,
+[`skills/whatsapp-taskwarrior/SKILL.md`](skills/whatsapp-taskwarrior/SKILL.md), and
+[`AGENTS.md`](AGENTS.md) for working in this repo. Claude Code reads them through
+`CLAUDE.md` and `.claude/skills/`; OpenClaw ([openclaw-fly](https://github.com/bahiamovementcenter/openclaw-fly))
+loads it from this repo as a flake input. Any other agent can be
+pointed at the same files.
+
+`wtw` can only read chats and show dry runs. Writing to Taskwarrior is the separate
+`wtw-apply` command, so in any runtime you can allow `wtw` and require your approval
+for `wtw-apply`: Claude Code denies it in `.claude/settings.json`, and openclaw-fly
+leaves it off the exec allowlist so OpenClaw asks you each time.
 
 What `wtw` guarantees: it opens `messages.db` read-only and never calls the
 bridge, so it can't send anything to WhatsApp; it only reads allowlisted chats;
 every task must cite a real message; it never deletes tasks or edits tasks it
 didn't create; re-running a plan doesn't duplicate tasks; message text is passed
 to Taskwarrior as JSON data, never on the command line. For the agent,
-`.claude/settings.json` denies the MCP server's send tools and `--apply`.
+`.claude/settings.json` denies the MCP server's send tools and `wtw-apply`.
 
 ## Security
 

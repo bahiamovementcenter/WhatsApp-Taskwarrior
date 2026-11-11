@@ -133,12 +133,20 @@ def test_dry_run_writes_nothing(workspace, capsys):
     assert not (workspace / "state" / "cursors.json").exists()
 
 
+def test_wtw_apply_flag_is_refused(workspace, capsys):
+    pull(workspace)
+    write_plan(workspace, [{"op": "add", "source": src("M1"), "description": "Book the venue"}])
+    assert cli.main(["apply", "plan.json", "batch.json", "--apply"]) == 2
+    assert "wtw-apply plan.json batch.json" in capsys.readouterr().err
+    assert not (workspace / "state" / "cursors.json").exists()
+
+
 @needs_task
 def test_apply_add_then_complete_is_idempotent(workspace):
     pull(workspace)
     write_plan(workspace, [{"op": "add", "source": src("M1"), "description": "Book the venue", "due": "2026-11-13"}])
-    assert cli.main(["apply", "plan.json", "batch.json", "--apply"]) == 0
-    assert cli.main(["apply", "plan.json", "batch.json", "--apply"]) == 0  # re-run: skipped
+    assert cli.apply_main(["plan.json", "batch.json"]) == 0
+    assert cli.apply_main(["plan.json", "batch.json"]) == 0  # re-run: skipped
     tasks = owned(workspace)
     key = f"{GROUP}/M1"
     assert list(tasks) == [key]
@@ -160,7 +168,7 @@ def test_apply_add_then_complete_is_idempotent(workspace):
     assert [m["id"] for m in pull(workspace)["messages"]] == ["M4"]
 
     write_plan(workspace, [{"op": "complete", "source": src("M4"), "task": key}])
-    assert cli.main(["apply", "plan.json", "batch.json", "--apply"]) == 0
+    assert cli.apply_main(["plan.json", "batch.json"]) == 0
     assert owned(workspace)[key]["status"] == "completed"
     assert any((workspace / "state" / "backups").iterdir())
 
@@ -173,7 +181,7 @@ def test_tasks_without_wa_key_are_untouched(workspace):
     subprocess.run(["task", "rc.data.location=taskdata", "add", "my own task"], check=True, capture_output=True)
     pull(workspace)
     write_plan(workspace, [{"op": "add", "source": src("M1"), "description": "Book the venue"}])
-    assert cli.main(["apply", "plan.json", "batch.json", "--apply"]) == 0
+    assert cli.apply_main(["plan.json", "batch.json"]) == 0
     from whatsapp_taskwarrior.taskwarrior import decode_output
 
     raw = subprocess.run(
@@ -190,7 +198,7 @@ def test_forged_batch_message_is_rejected(workspace, capsys):
     batch["messages"].append({**batch["messages"][0], "id": "FAKE", "content": "made up"})
     (workspace / "batch.json").write_text(json.dumps(batch))
     write_plan(workspace, [{"op": "add", "source": src("FAKE"), "description": "x"}])
-    assert cli.main(["apply", "plan.json", "batch.json", "--apply"]) == 2
+    assert cli.apply_main(["plan.json", "batch.json"]) == 2
     assert "not in messages.db" in capsys.readouterr().err
     assert owned(workspace) == {}
 

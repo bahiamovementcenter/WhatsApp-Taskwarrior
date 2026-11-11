@@ -4,7 +4,11 @@ wtw chats                       list chats, to build the allowlist
 wtw tasks                       list the tasks wtw manages
 wtw pull -o batch.json          read new messages (changes nothing)
 wtw apply plan.json batch.json  show what would change (dry run)
-wtw apply ... --apply           back up Taskwarrior, write, advance cursors
+
+Writing is a separate command, wtw-apply, so an agent runtime can allow wtw and
+still require a person's approval for every write:
+
+wtw-apply plan.json batch.json  back up Taskwarrior, write, advance cursors
 """
 
 from __future__ import annotations
@@ -105,9 +109,20 @@ def cmd_pull(args: argparse.Namespace) -> int:
 
 
 def cmd_apply(args: argparse.Namespace) -> int:
-    cfg = config_mod.load(args.config)
-    plan = json.loads(Path(args.plan).read_text(encoding="utf-8"))
-    batch = json.loads(Path(args.batch).read_text(encoding="utf-8"))
+    if args.apply:
+        print(
+            "error: wtw apply only shows the dry run. To write, a person approves and runs:\n"
+            f"  wtw-apply {args.plan} {args.batch}",
+            file=sys.stderr,
+        )
+        return 2
+    return _check_and_apply(args.config, args.plan, args.batch, write=False)
+
+
+def _check_and_apply(config: Path, plan_path: str, batch_path: str, *, write: bool) -> int:
+    cfg = config_mod.load(config)
+    plan = json.loads(Path(plan_path).read_text(encoding="utf-8"))
+    batch = json.loads(Path(batch_path).read_text(encoding="utf-8"))
     cited = sorted(
         {
             (str(o["source"].get("chat_jid")), str(o["source"].get("message_id")))
@@ -135,8 +150,8 @@ def cmd_apply(args: argparse.Namespace) -> int:
     for s in changes.skipped:
         print(f"= skip     {s}")
 
-    if not args.apply:
-        print("\ndry run: nothing written. Re-run with --apply to write.")
+    if not write:
+        print(f"\ndry run: nothing written. To write, a person approves and runs: wtw-apply {plan_path} {batch_path}")
         return 0
 
     if not changes.empty:
@@ -146,7 +161,7 @@ def cmd_apply(args: argparse.Namespace) -> int:
     log = cfg.state_dir / "log.jsonl"
     log.parent.mkdir(parents=True, exist_ok=True)
     with log.open("a", encoding="utf-8") as fh:
-        entry = {"at": datetime.now(UTC).isoformat(timespec="seconds"), "plan": args.plan, "batch": args.batch}
+        entry = {"at": datetime.now(UTC).isoformat(timespec="seconds"), "plan": plan_path, "batch": batch_path}
         entry |= {"new": len(changes.new), "updated": len(changes.updated), "skipped": changes.skipped}
         fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
@@ -186,15 +201,33 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("-o", "--output", default="-", help="batch file (default: stdout)")
     p.set_defaults(func=cmd_pull)
 
-    p = sub.add_parser("apply", help="check a plan against a batch; write with --apply")
+    p = sub.add_parser("apply", help="check a plan against a batch (dry run; writing is wtw-apply)")
     p.add_argument("plan")
     p.add_argument("batch")
-    p.add_argument("--apply", action="store_true", help="actually write to Taskwarrior")
+    # Kept only to point old habits at wtw-apply.
+    p.add_argument("--apply", action="store_true", help=argparse.SUPPRESS)
     p.set_defaults(func=cmd_apply)
 
     args = ap.parse_args(argv)
+    return _run(args.func, args)
+
+
+def apply_main(argv: list[str] | None = None) -> int:
+    """wtw-apply: check a plan like `wtw apply`, then back up Taskwarrior, write and advance cursors."""
+    ap = argparse.ArgumentParser(
+        prog="wtw-apply",
+        description="Write a plan to Taskwarrior after a person has approved its dry run (wtw apply).",
+    )
+    ap.add_argument("-c", "--config", type=Path, default=config_mod.DEFAULT_CONFIG)
+    ap.add_argument("plan")
+    ap.add_argument("batch")
+    args = ap.parse_args(argv)
+    return _run(lambda a: _check_and_apply(a.config, a.plan, a.batch, write=True), args)
+
+
+def _run(func, args: argparse.Namespace) -> int:
     try:
-        return args.func(args)
+        return func(args)
     except (config_mod.ConfigError, FileNotFoundError, RuntimeError, json.JSONDecodeError) as e:
         print(f"error: {e}", file=sys.stderr)
         return 1
