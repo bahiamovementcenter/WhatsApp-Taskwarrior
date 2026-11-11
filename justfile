@@ -34,13 +34,17 @@ mcp:
 chats:
     uv run wtw chats --groups
 
-# Read new messages from allowlisted chats into .wtw/batch.json (changes nothing)
+# Read new messages from allowlisted chats into work/batch.json (changes nothing)
 pull:
-    uv run wtw pull -o .wtw/batch.json
+    uv run wtw pull -o work/batch.json
 
-# Dry run: show what .wtw/plan.json would change. Add --apply yourself to write.
-check-plan plan=".wtw/plan.json" batch=".wtw/batch.json":
+# Dry run: show what work/plan.json would change (nothing written)
+check-plan plan="work/plan.json" batch="work/batch.json":
     uv run wtw apply {{ plan }} {{ batch }}
+
+# Write an approved plan: back up Taskwarrior, write tasks, advance cursors (for you, not the agent)
+apply plan="work/plan.json" batch="work/batch.json":
+    uv run wtw-apply {{ plan }} {{ batch }}
 
 # Walk through the whole flow on fake chat data, into a scratch task list (.wtw-demo/)
 demo:

@@ -9,6 +9,7 @@ cd "$ROOT"
 EX=examples/demo
 DEMO_DIR="${DEMO_DIR:-$ROOT/.wtw-demo}"
 read -r -a WTW <<<"${WTW:-uv run --quiet wtw}"
+read -r -a WTW_APPLY <<<"${WTW_APPLY:-uv run --quiet wtw-apply}"
 PY="${PYTHON:-python3}"
 
 # Start fresh, but only ever delete a folder this script created.
@@ -32,6 +33,7 @@ export TASKRC="$DEMO_DIR/taskrc" TASKDATA="$DEMO_DIR/taskdata"
 
 step() { printf '\n\033[1m== %s\033[0m\n' "$*"; }
 wtw() { "${WTW[@]}" -c "$CFG" "$@"; }
+wtw_apply() { "${WTW_APPLY[@]}" -c "$CFG" "$@"; }
 show_batch() {
   "$PY" - "$1" <<'PYEOF'
 import json, sys
@@ -62,12 +64,12 @@ show_batch "$DEMO_DIR/batch-day1.json"
 step "Day 1: the agent's plan, checked as a dry run (nothing written)"
 wtw apply "$EX/plan-day1.json" "$DEMO_DIR/batch-day1.json"
 
-step "Day 1: you approve it with --apply"
-wtw apply "$EX/plan-day1.json" "$DEMO_DIR/batch-day1.json" --apply
+step "Day 1: you approve it and run wtw-apply"
+wtw_apply "$EX/plan-day1.json" "$DEMO_DIR/batch-day1.json"
 board
 
 step "Running the same plan again changes nothing"
-wtw apply "$EX/plan-day1.json" "$DEMO_DIR/batch-day1.json" --apply
+wtw_apply "$EX/plan-day1.json" "$DEMO_DIR/batch-day1.json"
 
 step "Day 2: follow-ups and completions arrive"
 "$PY" "$EX/make_sample_db.py" "$DEMO_DIR/messages.db" --day 2
@@ -76,7 +78,7 @@ show_batch "$DEMO_DIR/batch-day2.json"
 
 step "Day 2: dry run, then apply"
 wtw apply "$EX/plan-day2.json" "$DEMO_DIR/batch-day2.json"
-wtw apply "$EX/plan-day2.json" "$DEMO_DIR/batch-day2.json" --apply
+wtw_apply "$EX/plan-day2.json" "$DEMO_DIR/batch-day2.json"
 board
 
 step "Every task keeps where it came from (notes on the flyer task)"
@@ -91,7 +93,7 @@ for t in json.loads(sys.stdin.buffer.read().decode("utf-8","surrogatepass").enco
 step "A plan citing a message that doesn't exist is rejected"
 "$PY" -c 'import json,sys; p=json.load(open(sys.argv[1])); p["operations"]=[{"op":"add","source":{"chat_jid":"120363111111111111@g.us","message_id":"MADE-UP"},"description":"Invented task"}]; json.dump(p,open(sys.argv[2],"w"))' \
   "$EX/plan-day1.json" "$DEMO_DIR/plan-bad.json"
-if wtw apply "$DEMO_DIR/plan-bad.json" "$DEMO_DIR/batch-day2.json" --apply; then
+if wtw_apply "$DEMO_DIR/plan-bad.json" "$DEMO_DIR/batch-day2.json"; then
   echo "unexpected: bad plan was accepted" >&2
   exit 1
 fi

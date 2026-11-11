@@ -8,6 +8,7 @@ dependencies = []
 
 [project.scripts]
 wtw = "whatsapp_taskwarrior.cli:main"
+wtw-apply = "whatsapp_taskwarrior.cli:apply_main"
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.6"]

@@ -18,6 +18,7 @@ def test_demo_runs_end_to_end(tmp_path):
     env = os.environ | {
         "DEMO_DIR": str(demo),
         "WTW": f"{sys.executable} -m whatsapp_taskwarrior.cli",
+        "WTW_APPLY": f"{sys.executable} -m whatsapp_taskwarrior.apply",
         "PYTHON": sys.executable,
     }
     proc = subprocess.run(["bash", str(ROOT / "scripts" / "demo.sh")], env=env, capture_output=True, check=False)

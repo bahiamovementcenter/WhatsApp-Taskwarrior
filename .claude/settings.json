@@ -9,7 +9,10 @@
       "Bash(curl *:8080*)",
       "Bash(task * delete*)",
       "Bash(task * purge*)",
+      "Bash(*wtw-apply*)",
+      "Bash(just apply*)",
       "Bash(*--apply*)",
+      "Bash(*whatsapp_taskwarrior.apply*)",
       "Read(**/store/**)",
       "Edit(.wtw/**)",
       "Write(.wtw/**)"
