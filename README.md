@@ -129,3 +129,10 @@ instead of the config file. Every group the account is in keeps a
 name-only row (recorded on connect), so `wtw chats --groups` can still list
 them. `store/` is git-ignored; never commit it. `.env` is ignored too — copy
 from `.env.example`.
+
+## Licence
+
+Copyright © 2026 Ash. Licensed under the
+[GNU Affero General Public License v3.0 only](LICENSE) (`AGPL-3.0-only`).
+
+`third_party/whatsapp-mcp` is a git submodule pointing at its own repository and keeps its own licence.
